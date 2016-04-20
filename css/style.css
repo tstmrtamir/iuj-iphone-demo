@@ -1,0 +1,27 @@
+.shortdetail {
+    float: left;
+	width:100%;
+}
+.contentcolumn{
+	margin-left:110px;
+	font-size:14px;
+}
+.poster{
+	display:block;
+	width:100px;
+	float:left;
+    margin-right: -100px;
+}
+.shortdetail p{
+	display:inline !important;
+}
+#movielist{
+	margin:0;
+}
+.genres{
+	font-size:13px;
+}
+.rateit{
+	margin-bottom:5px;
+}
+

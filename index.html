@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <!-- Include meta tag to ensure proper rendering and touch zooming -->
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Include jQuery Mobile stylesheets -->
+  <link rel="stylesheet" href="css/jquery.mobile-1.4.5.min.css">
+  <link rel="stylesheet" href="css/rateit.css">
+  <link rel="stylesheet" href="css/style.css">
+  <!-- Include the jQuery library -->
+  <script src="js/jquery-1.11.2.min.js"></script>
+  <!-- Include the jQuery Mobile library -->
+  <script>
+    $(document).bind('mobileinit',function(){
+        $.mobile.changePage.defaults.changeHash = false;
+        $.mobile.hashListeningEnabled = false;
+        $.mobile.pushStateEnabled = false;
+    });
+  </script> 
+  <script src="js/jquery.mobile-1.4.5.min.js"></script>
+  <script src="js/handlebars-v4.0.5.js"></script>
+  <script src="js/themoviedb.min.js"></script>
+</head>
+<body>
+
+<div data-role="page" id="pageone">
+  <div data-role="header">
+  <h1>Welcome To Movie Database</h1>
+  </div>
+
+  <div data-role="main" class="ui-content">
+	<ul data-role="listview" data-inset="true" id="movielist">
+	    
+	</ul>
+  </div>
+
+  <div data-role="footer">
+  <h1>&copy 2016, Tamir, IUJ</h1>
+  </div>
+</div> 
+
+
+<script id="item-template" type="text/x-handlebars-template">
+    <li>
+		<img class="poster" src="{{image}}" />
+        
+		<div class="shortdetail">
+			<div class="contentcolumn">
+				<h3>{{title}}</h3>
+				<div class="rateit" data-rateit-readonly="true" data-rateit-value="{{vote_average}}" data-rateit-ispreset="true" ></div>
+				<div><span class="text">{{release_date}}</span></div>
+				<div class="genres">{{genre}}</div>
+			</div>
+		</div>
+		
+		<div style="clear:both;"></div>
+    </li>
+</script>
+
+<script>
+var genres = {};
+
+theMovieDb.genres.getList({}, successGenre, errorCB);
+
+theMovieDb.discover.getMovies({"primary_release_year":2015, sort_by:"popularity.desc", page:1 }, successCB, errorCB);
+
+function successCB(data) {
+	var obj = JSON.parse(data);
+	var mlist = obj["results"];
+	var path = theMovieDb.common.images_uri + mlist[0]["poster_path"];
+	//$('#image').attr('src',path);
+	console.log(path);
+	var template = Handlebars.compile($("#item-template").html());
+	var img = "https://assets.tmdb.org/assets/f996aa2014d2ffddfda8463c479898a3/images/no-poster-w185.jpg";
+	var img_path = "";
+	var i = 0;
+	for (i = 0; i < mlist.length; i++) {
+		img_path = mlist[i]["poster_path"];
+		img_path = !img_path?img:theMovieDb.common.images_uri + img_path;
+		var str_genre = "";
+		var pre = "";
+		mlist[i]["genre_ids"].forEach(function(item) 
+		{
+			str_genre += pre + genres[item];
+			pre = ", ";
+		});
+
+		var context = {
+			image: img_path,
+			title: mlist[i]["title"],
+			release_date: mlist[i]["release_date"],
+			vote_average: mlist[i]["vote_average"]/2,
+			genre: str_genre,
+		};
+		$('#movielist').append(template(context));
+	}
+
+	loadjscssfile("js/jquery.rateit.min.js", "js")
+	
+	console.log(path);
+};
+
+
+function successGenre(data) {
+	var obj = JSON.parse(data);
+	var glist = obj["genres"];
+	//$('#image').attr('src',path);
+	
+	for (i = 0; i < glist.length; i++) {
+		var columnName = glist[i]["id"];
+        genres[columnName] = glist[i]["name"];
+	}
+	//console.log(jsonData[18]);
+};
+
+function errorCB(data) {
+	console.log("Error callback: " + data);
+};
+
+function loadjscssfile(filename, filetype){
+    if (filetype=="js"){ //if filename is a external JavaScript file
+        var fileref=document.createElement('script')
+        fileref.setAttribute("type","text/javascript")
+        fileref.setAttribute("src", filename)
+    }
+    else if (filetype=="css"){ //if filename is an external CSS file
+        var fileref=document.createElement("link")
+        fileref.setAttribute("rel", "stylesheet")
+        fileref.setAttribute("type", "text/css")
+        fileref.setAttribute("href", filename)
+    }
+    if (typeof fileref!="undefined")
+        document.getElementsByTagName("head")[0].appendChild(fileref)
+}
+ 
+</script>
+
+  
+</body>
+</html>
